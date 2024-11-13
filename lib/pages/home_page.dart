@@ -47,9 +47,10 @@ class _HomePageState extends State<HomePage> {
       body: Consumer<PlaylistProvider>(
         builder: (context, value, child) {
           final List<Song> playlist = value.playlist;
-          final currentSongIndex = value.currentSongIndex ?? 0;
-          final currentSong =
-              playlist.isNotEmpty ? playlist[currentSongIndex] : null;
+          final currentSongIndex = value.currentSongIndex;
+          final currentSong = currentSongIndex != null && playlist.isNotEmpty
+              ? playlist[currentSongIndex]
+              : null;
 
           return Column(
             children: [
@@ -71,7 +72,8 @@ class _HomePageState extends State<HomePage> {
                           fontSize: 15,
                         ),
                       ),
-                      leading: Image.asset(song.albumArtImagePath,
+                      leading: Image.asset(
+                        song.albumArtImagePath,
                       ),
                       onTap: () => goToSong(
                         index,
@@ -86,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0),
                   child: GestureDetector(
-                    onTap: () => goToSong(currentSongIndex),
+                    onTap: () => goToSong(currentSongIndex!),
                     child: Column(
                       children: [
                         Text(
@@ -120,8 +122,7 @@ class _HomePageState extends State<HomePage> {
                   min: 0,
                   max: value.totalDuration.inSeconds.toDouble(),
                   value: value.currentDuration.inSeconds.toDouble(),
-                  onChanged: (double double) {
-                  },
+                  onChanged: (double double) {},
                   onChangeEnd: (double double) {
                     value.seek(Duration(seconds: double.toInt()));
                   },

@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:music_player/models/song.dart';
 
 class PlaylistProvider extends ChangeNotifier {
-
   final List<Song> _playlist = [
     Song(
-        songName: 'Teardrops',
-        artistName: 'Liam Payne',
-        albumArtImagePath: 'assets/images/liam_payne.jpg',
-        audioPath: 'audio/Liam Payne - Teardrops (Lyric Video) - LiamPayneVEVO.mp3',
+      songName: 'Teardrops',
+      artistName: 'Liam Payne',
+      albumArtImagePath: 'assets/images/liam_payne.jpg',
+      audioPath:
+          'audio/Liam Payne - Teardrops (Lyric Video) - LiamPayneVEVO.mp3',
     ),
     Song(
       songName: 'Look Mom I Can Fly',
@@ -53,32 +53,40 @@ class PlaylistProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void resume () async {
+  void resume() async {
     await _audioPlayer.resume();
     _isPlaying = true;
     notifyListeners();
   }
 
   void pauseOrResume() async {
-    if (_isPlaying) {
-      pause();
+    if (_currentSongIndex == null) {
+      _currentSongIndex = 0;
+      play();
     } else {
-      resume();
+      if (_isPlaying) {
+        pause();
+      } else {
+        resume();
+      }
     }
+
     notifyListeners();
   }
 
-  void seek (Duration position) async {
+  void seek(Duration position) async {
     await _audioPlayer.seek(position);
   }
 
   void playNextSong() {
-    if(_currentSongIndex != null) {
-      if (_currentSongIndex! < _playlist.length-1) {
+    if (_currentSongIndex != null) {
+      if (_currentSongIndex! < _playlist.length - 1) {
         currentSongIndex = currentSongIndex! + 1;
       } else {
         currentSongIndex = 0;
       }
+    } else {
+      _currentSongIndex = 0;
     }
   }
 
@@ -92,15 +100,17 @@ class PlaylistProvider extends ChangeNotifier {
   void playPreviousSong() async {
     if (_currentDuration.inSeconds > 2) {
       seek(Duration.zero);
-    }
-    else {
-      if (_currentSongIndex! > 0) {
-        _currentSongIndex = _currentSongIndex! - 1;
+    } else {
+      if (_currentSongIndex != null) {
+        if (_currentSongIndex! > 0) {
+          _currentSongIndex = _currentSongIndex! - 1;
+        } else {
+          _currentSongIndex = _playlist.length - 1;
+        }
+      } else {
+        _currentSongIndex = 0;
       }
-      else {
-        _currentSongIndex = _playlist.length - 1;
-      }
-      play();(_playlist[_currentSongIndex!]);
+      play();
     }
   }
 
@@ -121,9 +131,13 @@ class PlaylistProvider extends ChangeNotifier {
   }
 
   List<Song> get playlist => _playlist;
+
   int? get currentSongIndex => _currentSongIndex;
+
   bool get isPlaying => _isPlaying;
+
   Duration get currentDuration => _currentDuration;
+
   Duration get totalDuration => _totalDuration;
 
   set currentSongIndex(int? newIndex) {
